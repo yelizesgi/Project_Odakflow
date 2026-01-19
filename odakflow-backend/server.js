@@ -1,25 +1,33 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const cors = require('cors');
-require('dotenv').config();
+const connectDB = require('./config/db.js');
+
+// Yapılandırmayı yükle
+dotenv.config();
+
+// Veritabanına bağlan
+connectDB();
 
 const app = express();
 
-// Middleware (Ara Yazılımlar)
+// Rota Tanımları (Import)
+const serviceRoutes = require('./routes/serviceRoutes');
+
+// Middleware
 app.use(cors());
-app.use(express.json()); // Gelen JSON verilerini okuyabilmemiz için
+app.use(express.json());
 
-// Veritabanı Bağlantısı
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('Odakflow Veritabanı Bağlandı 🚀'))
-    .catch(err => console.log('Bağlantı Hatası:', err));
+// Rotaları Kullan (Middleware)
+app.use('/api/services', serviceRoutes);
 
-// Test Rotası
+// Temel Test Rotası
 app.get('/', (req, res) => {
-    res.send('Odakflow API çalışıyor...');
+    res.json({ message: "Odakflow API'sine Hoş Geldiniz. Sistemler Aktif. 🚀" });
 });
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-    console.log(`Sunucu ${PORT} portunda yayında. Hazırız!`);
+    console.log(`${process.env.NODE_ENV} modunda, sunucu ${PORT} portunda başladı.`);
 });
